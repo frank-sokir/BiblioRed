@@ -1,0 +1,53 @@
+20:47:47.580 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [pe.bibliored.FlujoIntegrationTest]: FlujoIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+20:47:47.702 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration pe.bibliored.BiblioRedApplication for test class pe.bibliored.FlujoIntegrationTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.7)
+
+2026-10-27 20:47:48 INFO  pe.bibliored.FlujoIntegrationTest - Starting FlujoIntegrationTest using Java 17.0.20.1 with PID 100556 (started by Sokir0 in C:\Users\Sokir0\Documents\Codex\2026-10-27\a\outputs\BiblioRed)
+2026-10-27 20:47:48 INFO  pe.bibliored.FlujoIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-10-27 20:47:48 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-27 20:47:49 INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 71 ms. Found 7 JPA repository interfaces.
+2026-10-27 20:47:49 INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-10-27 20:47:49 INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.6.33.Final
+2026-10-27 20:47:49 INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-10-27 20:47:50 INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-27 20:47:50 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-10-27 20:47:50 INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:test user=SA
+2026-10-27 20:47:50 INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-10-27 20:47:50 INFO  o.hibernate.orm.connections.pooling - HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-27 20:47:51 INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-27 20:47:51 INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-27 20:47:51 INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-10-27 20:47:52 INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name usuarios
+2026-10-27 20:47:52 INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+2026-10-27 20:47:53 INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-10-27 20:47:53 INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-10-27 20:47:53 INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-10-27 20:47:53 INFO  pe.bibliored.FlujoIntegrationTest - Started FlujoIntegrationTest in 5.797 seconds (process running for 6.728)
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+2026-10-27 20:47:54 INFO  p.bibliored.service.PrestamoService - Solicitud registrada id=1 ejemplar=1
+2026-10-27 20:47:54 INFO  p.bibliored.service.PrestamoService - Devoluci�n registrada pr�stamo=1
+2026-10-27 20:47:54 INFO  p.bibliored.service.PrestamoService - Solicitud registrada id=2 ejemplar=1
+2026-10-27 20:47:54 INFO  p.bibliored.service.PrestamoService - Solicitud registrada id=3 ejemplar=1
+2026-10-27 20:47:54 INFO  p.bibliored.service.PrestamoService - Solicitud registrada id=4 ejemplar=2
+2026-10-27 20:47:54 INFO  p.bibliored.service.PrestamoService - Solicitud registrada id=5 ejemplar=3
+2026-10-27 20:47:54 INFO  p.bibliored.service.PrestamoService - Solicitud registrada id=6 ejemplar=1
+2026-10-27 20:47:54 INFO  p.bibliored.service.PrestamoService - Solicitud registrada id=7 ejemplar=1
+2026-10-27 20:47:54 INFO  p.bibliored.service.PrestamoService - Devoluci�n registrada pr�stamo=7
+2026-10-27 20:47:54 INFO  p.bibliored.service.PrestamoService - Solicitud registrada id=8 ejemplar=1
+2026-10-27 20:47:54 INFO  p.bibliored.service.PrestamoService - Devoluci�n registrada pr�stamo=8
+2026-10-27 20:47:55 INFO  p.bibliored.service.PrestamoService - Solicitud registrada id=9 ejemplar=1

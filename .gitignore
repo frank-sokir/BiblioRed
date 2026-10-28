@@ -4,3 +4,6 @@ data/
 .env
 .idea/
 *.iml
+
+app/
+*.bundle

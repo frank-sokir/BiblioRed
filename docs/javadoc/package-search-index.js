@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"pe.bibliored"},{"l":"pe.bibliored.config"},{"l":"pe.bibliored.controller"},{"l":"pe.bibliored.dao"},{"l":"pe.bibliored.model"},{"l":"pe.bibliored.service"}];updateSearchResults();

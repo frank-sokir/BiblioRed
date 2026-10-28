@@ -1,7 +1,65 @@
 package pe.bibliored.config;
-import pe.bibliored.dao.UsuarioDao;import org.springframework.context.annotation.*;import org.springframework.security.config.annotation.web.builders.HttpSecurity;import org.springframework.security.web.SecurityFilterChain;import org.springframework.security.core.userdetails.*;import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;import org.springframework.security.crypto.password.PasswordEncoder;import org.springframework.security.web.csrf.*;
-@Configuration public class SeguridadConfig {
-@Bean PasswordEncoder encoder(){return new BCryptPasswordEncoder();}
-@Bean UserDetailsService usuarios(UsuarioDao dao){return correo->{var u=dao.findByCorreoIgnoreCase(correo).orElseThrow(()->new UsernameNotFoundException("Credenciales inválidas"));return User.withUsername(u.correo).password(u.passwordHash).roles(u.rol).disabled(!u.activo).build();};}
-@Bean SecurityFilterChain seguridad(HttpSecurity h)throws Exception {h.authorizeHttpRequests(a->a.requestMatchers("/","/index.html","/style.css","/app.js","/api/csrf","/api/registro","/error").permitAll().requestMatchers("/api/admin/**").hasRole("ADMIN").requestMatchers("/api/personal/**").hasAnyRole("PERSONAL","ADMIN").anyRequest().authenticated()).csrf(c->c.csrfTokenRepository(new HttpSessionCsrfTokenRepository())).formLogin(f->f.loginProcessingUrl("/api/login").successHandler((q,r,a)->r.setStatus(204)).failureHandler((q,r,e)->r.sendError(401,"Credenciales inválidas"))).logout(l->l.logoutUrl("/api/logout").logoutSuccessHandler((q,r,a)->r.setStatus(204))).exceptionHandling(e->e.authenticationEntryPoint((q,r,x)->r.sendError(401)).accessDeniedHandler((q,r,x)->r.sendError(403)));return h.build();}
+
+import org.springframework.context.annotation.*;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.*;
+import pe.bibliored.dao.UsuarioDao;
+
+@Configuration
+public class SeguridadConfig {
+  @Bean
+  PasswordEncoder encoder() {
+    return new BCryptPasswordEncoder();
+  }
+
+  @Bean
+  UserDetailsService usuarios(UsuarioDao dao) {
+    return correo -> {
+      var u =
+          dao.findByCorreoIgnoreCase(correo)
+              .orElseThrow(() -> new UsernameNotFoundException("Credenciales inválidas"));
+      return User.withUsername(u.correo)
+          .password(u.passwordHash)
+          .roles(u.rol)
+          .disabled(!u.activo)
+          .build();
+    };
+  }
+
+  @Bean
+  SecurityFilterChain seguridad(HttpSecurity h) throws Exception {
+    h.authorizeHttpRequests(
+            a ->
+                a.requestMatchers(
+                        "/",
+                        "/index.html",
+                        "/style.css",
+                        "/app.js",
+                        "/api/csrf",
+                        "/api/registro",
+                        "/error")
+                    .permitAll()
+                    .requestMatchers("/api/admin/**")
+                    .hasRole("ADMIN")
+                    .requestMatchers("/api/personal/**")
+                    .hasAnyRole("PERSONAL", "ADMIN")
+                    .anyRequest()
+                    .authenticated())
+        .csrf(c -> c.csrfTokenRepository(new HttpSessionCsrfTokenRepository()))
+        .formLogin(
+            f ->
+                f.loginProcessingUrl("/api/login")
+                    .successHandler((q, r, a) -> r.setStatus(204))
+                    .failureHandler((q, r, e) -> r.sendError(401, "Credenciales inválidas")))
+        .logout(l -> l.logoutUrl("/api/logout").logoutSuccessHandler((q, r, a) -> r.setStatus(204)))
+        .exceptionHandling(
+            e ->
+                e.authenticationEntryPoint((q, r, x) -> r.sendError(401))
+                    .accessDeniedHandler((q, r, x) -> r.sendError(403)));
+    return h.build();
+  }
 }

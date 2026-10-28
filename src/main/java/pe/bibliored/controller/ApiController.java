@@ -1,24 +1,216 @@
 package pe.bibliored.controller;
-import pe.bibliored.dao.*;import pe.bibliored.model.*;import pe.bibliored.service.*;import jakarta.validation.Valid;import jakarta.validation.constraints.*;import org.springframework.web.bind.annotation.*;import org.springframework.security.web.csrf.CsrfToken;import org.springframework.security.crypto.password.PasswordEncoder;import org.springframework.transaction.annotation.Transactional;import java.security.Principal;import java.util.*;import java.time.*;import org.apache.commons.lang3.StringUtils;import com.google.common.base.Preconditions;import org.apache.poi.xssf.usermodel.XSSFWorkbook;import org.springframework.http.*;
-@RestController @RequestMapping("/api") public class ApiController {
-private final UsuarioDao usuarios;private final BibliotecaDao bibliotecas;private final LibroDao libros;private final EjemplarDao ejemplares;private final PrestamoDao prestamos;private final MultaDao multas;private final PrestamoService servicio;private final PasswordEncoder encoder;
-public ApiController(UsuarioDao u,BibliotecaDao b,LibroDao l,EjemplarDao e,PrestamoDao p,MultaDao m,PrestamoService s,PasswordEncoder encoder){usuarios=u;bibliotecas=b;libros=l;ejemplares=e;prestamos=p;multas=m;servicio=s;this.encoder=encoder;}
-@GetMapping("/csrf") Map<String,String> csrf(CsrfToken token){return Map.of("token",token.getToken(),"headerName",token.getHeaderName());}
-Usuario actual(Principal p){return usuarios.findByCorreoIgnoreCase(p.getName()).orElseThrow();}
-@GetMapping("/yo") Usuario yo(Principal p){return actual(p);}
-public record Registro(@NotBlank @Size(max=120) String nombre,@Pattern(regexp="[0-9]{8}") String dni,@Email @NotBlank @Size(max=120) String correo,@Size(min=10,max=72) String password,@NotNull Long bibliotecaId){}
-@PostMapping("/registro") @Transactional Usuario registro(@Valid @RequestBody Registro r){String correo=StringUtils.lowerCase(StringUtils.trim(r.correo()));Preconditions.checkArgument(!usuarios.existsByCorreoIgnoreCase(correo)&&!usuarios.existsByDni(r.dni()),"El correo o DNI ya está registrado");Preconditions.checkArgument(bibliotecas.existsById(r.bibliotecaId()),"Biblioteca inválida");var u=new Usuario();u.nombre=StringUtils.normalizeSpace(r.nombre());u.dni=r.dni();u.correo=correo;u.passwordHash=encoder.encode(r.password());u.bibliotecaId=r.bibliotecaId();return usuarios.save(u);}
-@GetMapping("/bibliotecas") List<Biblioteca> bibliotecas(){return bibliotecas.findAll();}
-@GetMapping("/catalogo") List<Map<String,Object>> catalogo(@RequestParam(defaultValue="") String q){String filtro=StringUtils.stripAccents(q).toLowerCase(Locale.ROOT);var todos=ejemplares.findAll();return libros.findAll().stream().filter(l->StringUtils.stripAccents(l.titulo+" "+l.autor+" "+l.categoria+" "+l.isbn+" "+todos.stream().filter(e->e.libroId.equals(l.id)).map(e->e.codigo).toList()).toLowerCase(Locale.ROOT).contains(filtro)).map(l->{Map<String,Object> r=new LinkedHashMap<>();r.put("libro",l);r.put("ejemplares",todos.stream().filter(e->e.libroId.equals(l.id)).toList());return r;}).toList();}
-public record Solicitud(@NotNull Long ejemplarId,@NotNull LocalDate fechaRecojo){}
-@PostMapping("/prestamos") Prestamo solicitar(@Valid @RequestBody Solicitud s,Principal p){return servicio.solicitar(actual(p).id,s.ejemplarId(),s.fechaRecojo());}
-@GetMapping("/prestamos") List<Prestamo> prestamos(Principal p){var u=actual(p);return prestamos.findAll().stream().filter(x->!u.rol.equals("USUARIO")||x.usuarioId.equals(u.id)).toList();}
-@GetMapping("/multas") List<Multa> multas(Principal p){var ids=prestamos(p).stream().map(x->x.id).toList();return multas.findAll().stream().filter(x->ids.contains(x.prestamoId)).toList();}
-@PostMapping("/personal/prestamos/{id}/entregar") Prestamo entregar(@PathVariable Long id){return servicio.entregar(id);}
-public record Retorno(@Size(max=250) String observacion){}
-@PostMapping("/personal/prestamos/{id}/devolver") Prestamo devolver(@PathVariable Long id,@Valid @RequestBody Retorno r){return servicio.devolver(id,r.observacion());}
-@GetMapping("/admin/usuarios") List<Usuario> usuarios(){return usuarios.findAll();}
-public record NuevoLibro(@NotBlank @Size(max=180) String titulo,@NotBlank @Size(max=120) String autor,@NotBlank @Size(max=80) String categoria,@Pattern(regexp="[0-9Xx-]{10,20}") String isbn,@NotNull Long bibliotecaId,@NotBlank @Size(max=30) String codigo){}
-@PostMapping("/admin/libros") @Transactional Libro agregar(@Valid @RequestBody NuevoLibro n){Preconditions.checkArgument(bibliotecas.existsById(n.bibliotecaId()),"Biblioteca inválida");var l=new Libro();l.titulo=StringUtils.normalizeSpace(n.titulo());l.autor=StringUtils.normalizeSpace(n.autor());l.categoria=n.categoria();l.isbn=n.isbn();libros.save(l);var e=new Ejemplar();e.libroId=l.id;e.bibliotecaId=n.bibliotecaId();e.codigo=n.codigo();ejemplares.save(e);return l;}
-@GetMapping("/personal/reportes/inventario.xlsx") ResponseEntity<byte[]> exportar()throws Exception {try(var wb=new XSSFWorkbook();var out=new java.io.ByteArrayOutputStream()){var s=wb.createSheet("Inventario");var header=s.createRow(0);String[] cols={"Código","Título","Biblioteca","Estado"};for(int i=0;i<cols.length;i++)header.createCell(i).setCellValue(cols[i]);int n=1;for(var e:ejemplares.findAll()){var r=s.createRow(n++);r.createCell(0).setCellValue(e.codigo);r.createCell(1).setCellValue(libros.findById(e.libroId).orElseThrow().titulo);r.createCell(2).setCellValue(bibliotecas.findById(e.bibliotecaId).orElseThrow().nombre);r.createCell(3).setCellValue(e.estado);}for(int i=0;i<4;i++)s.autoSizeColumn(i);wb.write(out);return ResponseEntity.ok().header("Content-Disposition","attachment; filename=inventario.xlsx").contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")).body(out.toByteArray());}}
+
+import com.google.common.base.Preconditions;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
+import java.security.Principal;
+import java.time.*;
+import java.util.*;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+import pe.bibliored.dao.*;
+import pe.bibliored.model.*;
+import pe.bibliored.service.*;
+
+@RestController
+@RequestMapping("/api")
+public class ApiController {
+  private final UsuarioDao usuarios;
+  private final BibliotecaDao bibliotecas;
+  private final LibroDao libros;
+  private final EjemplarDao ejemplares;
+  private final PrestamoDao prestamos;
+  private final MultaDao multas;
+  private final PrestamoService servicio;
+  private final PasswordEncoder encoder;
+
+  public ApiController(
+      UsuarioDao u,
+      BibliotecaDao b,
+      LibroDao l,
+      EjemplarDao e,
+      PrestamoDao p,
+      MultaDao m,
+      PrestamoService s,
+      PasswordEncoder encoder) {
+    usuarios = u;
+    bibliotecas = b;
+    libros = l;
+    ejemplares = e;
+    prestamos = p;
+    multas = m;
+    servicio = s;
+    this.encoder = encoder;
+  }
+
+  @GetMapping("/csrf")
+  Map<String, String> csrf(CsrfToken token) {
+    return Map.of("token", token.getToken(), "headerName", token.getHeaderName());
+  }
+
+  Usuario actual(Principal p) {
+    return usuarios.findByCorreoIgnoreCase(p.getName()).orElseThrow();
+  }
+
+  @GetMapping("/yo")
+  Usuario yo(Principal p) {
+    return actual(p);
+  }
+
+  public record Registro(
+      @NotBlank @Size(max = 120) String nombre,
+      @Pattern(regexp = "[0-9]{8}") String dni,
+      @Email @NotBlank @Size(max = 120) String correo,
+      @Size(min = 10, max = 72) String password,
+      @NotNull Long bibliotecaId) {}
+
+  @PostMapping("/registro")
+  @Transactional
+  Usuario registro(@Valid @RequestBody Registro r) {
+    String correo = StringUtils.lowerCase(StringUtils.trim(r.correo()));
+    Preconditions.checkArgument(
+        !usuarios.existsByCorreoIgnoreCase(correo) && !usuarios.existsByDni(r.dni()),
+        "El correo o DNI ya está registrado");
+    Preconditions.checkArgument(bibliotecas.existsById(r.bibliotecaId()), "Biblioteca inválida");
+    var u = new Usuario();
+    u.nombre = StringUtils.normalizeSpace(r.nombre());
+    u.dni = r.dni();
+    u.correo = correo;
+    u.passwordHash = encoder.encode(r.password());
+    u.bibliotecaId = r.bibliotecaId();
+    return usuarios.save(u);
+  }
+
+  @GetMapping("/bibliotecas")
+  List<Biblioteca> bibliotecas() {
+    return bibliotecas.findAll();
+  }
+
+  @GetMapping("/catalogo")
+  List<Map<String, Object>> catalogo(@RequestParam(defaultValue = "") String q) {
+    String filtro = StringUtils.stripAccents(q).toLowerCase(Locale.ROOT);
+    var todos = ejemplares.findAll();
+    return libros.findAll().stream()
+        .filter(
+            l ->
+                StringUtils.stripAccents(
+                        l.titulo
+                            + " "
+                            + l.autor
+                            + " "
+                            + l.categoria
+                            + " "
+                            + l.isbn
+                            + " "
+                            + todos.stream()
+                                .filter(e -> e.libroId.equals(l.id))
+                                .map(e -> e.codigo)
+                                .toList())
+                    .toLowerCase(Locale.ROOT)
+                    .contains(filtro))
+        .map(
+            l -> {
+              Map<String, Object> r = new LinkedHashMap<>();
+              r.put("libro", l);
+              r.put("ejemplares", todos.stream().filter(e -> e.libroId.equals(l.id)).toList());
+              return r;
+            })
+        .toList();
+  }
+
+  public record Solicitud(@NotNull Long ejemplarId, @NotNull LocalDate fechaRecojo) {}
+
+  @PostMapping("/prestamos")
+  Prestamo solicitar(@Valid @RequestBody Solicitud s, Principal p) {
+    return servicio.solicitar(actual(p).id, s.ejemplarId(), s.fechaRecojo());
+  }
+
+  @GetMapping("/prestamos")
+  List<Prestamo> prestamos(Principal p) {
+    var u = actual(p);
+    return prestamos.findAll().stream()
+        .filter(x -> !u.rol.equals("USUARIO") || x.usuarioId.equals(u.id))
+        .toList();
+  }
+
+  @GetMapping("/multas")
+  List<Multa> multas(Principal p) {
+    var ids = prestamos(p).stream().map(x -> x.id).toList();
+    return multas.findAll().stream().filter(x -> ids.contains(x.prestamoId)).toList();
+  }
+
+  @PostMapping("/personal/prestamos/{id}/entregar")
+  Prestamo entregar(@PathVariable Long id) {
+    return servicio.entregar(id);
+  }
+
+  public record Retorno(@Size(max = 250) String observacion) {}
+
+  @PostMapping("/personal/prestamos/{id}/devolver")
+  Prestamo devolver(@PathVariable Long id, @Valid @RequestBody Retorno r) {
+    return servicio.devolver(id, r.observacion());
+  }
+
+  @GetMapping("/admin/usuarios")
+  List<Usuario> usuarios() {
+    return usuarios.findAll();
+  }
+
+  public record NuevoLibro(
+      @NotBlank @Size(max = 180) String titulo,
+      @NotBlank @Size(max = 120) String autor,
+      @NotBlank @Size(max = 80) String categoria,
+      @Pattern(regexp = "[0-9Xx-]{10,20}") String isbn,
+      @NotNull Long bibliotecaId,
+      @NotBlank @Size(max = 30) String codigo) {}
+
+  @PostMapping("/admin/libros")
+  @Transactional
+  Libro agregar(@Valid @RequestBody NuevoLibro n) {
+    Preconditions.checkArgument(bibliotecas.existsById(n.bibliotecaId()), "Biblioteca inválida");
+    var l = new Libro();
+    l.titulo = StringUtils.normalizeSpace(n.titulo());
+    l.autor = StringUtils.normalizeSpace(n.autor());
+    l.categoria = n.categoria();
+    l.isbn = n.isbn();
+    libros.save(l);
+    var e = new Ejemplar();
+    e.libroId = l.id;
+    e.bibliotecaId = n.bibliotecaId();
+    e.codigo = n.codigo();
+    ejemplares.save(e);
+    return l;
+  }
+
+  @GetMapping("/personal/reportes/inventario.xlsx")
+  ResponseEntity<byte[]> exportar() throws Exception {
+    try (var wb = new XSSFWorkbook();
+        var out = new java.io.ByteArrayOutputStream()) {
+      var s = wb.createSheet("Inventario");
+      var header = s.createRow(0);
+      String[] cols = {"Código", "Título", "Biblioteca", "Estado"};
+      for (int i = 0; i < cols.length; i++) header.createCell(i).setCellValue(cols[i]);
+      int n = 1;
+      for (var e : ejemplares.findAll()) {
+        var r = s.createRow(n++);
+        r.createCell(0).setCellValue(e.codigo);
+        r.createCell(1).setCellValue(libros.findById(e.libroId).orElseThrow().titulo);
+        r.createCell(2).setCellValue(bibliotecas.findById(e.bibliotecaId).orElseThrow().nombre);
+        r.createCell(3).setCellValue(e.estado);
+      }
+      for (int i = 0; i < 4; i++) s.autoSizeColumn(i);
+      wb.write(out);
+      return ResponseEntity.ok()
+          .header("Content-Disposition", "attachment; filename=inventario.xlsx")
+          .contentType(
+              MediaType.parseMediaType(
+                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+          .body(out.toByteArray());
+    }
+  }
 }
