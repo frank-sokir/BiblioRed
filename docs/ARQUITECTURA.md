@@ -26,3 +26,8 @@ Sesión Spring Security; BCrypt; CSRF; validación de entrada; escape de textos 
 ## GitHub
 
 No existe remoto configurado. Crear un repositorio del equipo, añadir el remoto y publicar los commits locales. main estable, ramas por funcionalidad, revisión y pruebas antes de integrar. No presentar este historial como si fuera recuperado del proyecto perdido.
+
+
+## Cambio de persistencia del 29 de octubre de 2026
+
+La aplicación normal utiliza MySQL importado previamente. H2 y la carga automática de datos quedan exclusivamente en src/test. Para iniciar se ejecuta mvn spring-boot:run. Consultar ACTUALIZACION_MYSQL.md.

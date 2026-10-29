@@ -1,0 +1,1 @@
+MYSQL INTEGRATION PASS: SQL importado, login BCrypt, 6 t�tulos, 18 ejemplares, solicitud, entrega, devoluci�n, disponibilidad, inventario XLSX y permisos.

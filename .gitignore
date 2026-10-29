@@ -7,3 +7,5 @@ data/
 
 app/
 *.bundle
+
+/application-local.properties

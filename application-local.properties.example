@@ -1,0 +1,5 @@
+# Copia este archivo como application-local.properties junto a pom.xml.
+# Escribe la contraseña de tu usuario MySQL después del signo igual.
+# No es la contraseña de acceso a la página BiblioRed.
+spring.datasource.username=root
+spring.datasource.password=TU_CONTRASENA_MYSQL

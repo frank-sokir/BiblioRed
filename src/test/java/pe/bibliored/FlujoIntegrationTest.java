@@ -20,6 +20,7 @@ import pe.bibliored.service.*;
       "spring.datasource.url=jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",
       "spring.jpa.hibernate.ddl-auto=create-drop"
     })
+@org.springframework.test.context.ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Transactional
 class FlujoIntegrationTest {

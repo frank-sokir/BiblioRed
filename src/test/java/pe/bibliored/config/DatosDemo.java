@@ -6,9 +6,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import pe.bibliored.dao.*;
 import pe.bibliored.model.*;
 
-/** Datos de demostración ficticios, únicamente para el perfil local. */
+/** Datos de demostración ficticios, únicamente para las pruebas automáticas. */
 @Configuration
-@Profile("!mysql")
+@Profile("test")
 public class DatosDemo {
   @Bean
   CommandLineRunner datos(
