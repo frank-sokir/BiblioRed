@@ -1,0 +1,1 @@
+PASS MySQL 9.7.1 local 127.0.0.1:3308, base bibliored. Inicio con mvn spring-boot:run, HTTP 8080. Login, catálogo 6 títulos/18 ejemplares, solicitud, entrega, devolución, disponibilidad, XLSX, permisos: OK. Servidor original 3306 sin modificaciones.

@@ -4,7 +4,13 @@
 
 Requisitos: Java 17 o superior, Maven y MySQL en ejecución. Puedes usar IntelliJ IDEA.
 
-### Preparación de una sola vez
+### En esta computadora
+
+La base bibliored ya está importada en una instancia independiente de MySQL en 127.0.0.1:3308. La conexión está guardada en application-local.properties. Basta ejecutar mvn spring-boot:run. MySQL arranca al iniciar sesión en Windows mediante el acceso directo BiblioRed MySQL. Los datos están en %LOCALAPPDATA%/BiblioRed/MySQL/data. El servidor original del puerto 3306 no se modificó.
+
+Las credenciales locales no se incluyen en el ZIP. Si extraes el ZIP en otra carpeta de esta misma PC, copia allí el application-local.properties de la carpeta Codigo que ya está configurada. Para otra PC realiza los pasos siguientes.
+
+### Preparación en otra computadora
 
 1. Abre MySQL Workbench y conecta con tu servidor.
 2. Abre `database/mysql.sql` con File > Open SQL Script y ejecuta el archivo completo con el botón del rayo.
