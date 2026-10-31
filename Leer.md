@@ -15,7 +15,10 @@ Las credenciales locales no se incluyen en el ZIP. Si extraes el ZIP en otra car
 1. Abre MySQL Workbench y conecta con tu servidor.
 2. Abre `database/mysql.sql` con File > Open SQL Script y ejecuta el archivo completo con el botón del rayo.
 3. El script crea bibliored, las siete tablas relacionadas y datos ficticios para probar la página. No elimina datos existentes. Está preparado para una instalación nueva: si ya tienes tablas de otra versión, no ejecutes borrados para solucionarlo.
-4. Abre `application-local.properties` junto a `pom.xml`. Escribe tu usuario y contraseña de MySQL en las dos propiedades. La contraseña de MySQL no es la contraseña de acceso a la página. Este archivo queda excluido de Git.
+4. Copia `application-local.properties.example` y cambia el nombre de la copia a `application-local.properties`, junto a `pom.xml`.
+5. Abre la copia y configura el usuario y la contraseña de tu servidor MySQL. Si tu puerto es distinto de 3306, añade `spring.datasource.url` con la dirección y el puerto correctos, como se explica en Configuración. La contraseña de MySQL es distinta de la contraseña de acceso a la página. Este archivo queda excluido de Git.
+
+Esta preparación se realiza una sola vez. No vuelvas a ejecutar el SQL para iniciar la página cada día.
 
 ### Iniciar cada vez
 
@@ -66,16 +69,16 @@ mvn javadoc:javadoc
 
 H2 se utiliza únicamente en las pruebas automáticas, con una base temporal independiente de MySQL. La ejecución normal usa MySQL y no carga datos automáticamente: los datos iniciales provienen del SQL importado.
 
-El JAR compilado se conserva como entrega secundaria en app/bibliored.jar. La forma normal de trabajar y sustentar es `mvn spring-boot:run`.
+La descarga de GitHub contiene el código fuente. Puedes generar el JAR con `mvn clean package`. La forma normal de iniciar es `mvn spring-boot:run`.
 
 ## Alcance
 
-Funcionan acceso por roles, catálogo, solicitudes, entregas y devoluciones, control de restricciones, generación de multas e inventario XLSX. Permanecen pendientes el CRUD administrativo integral, regularización de multas, reportes adicionales y publicación GitHub.
+Funcionan acceso por roles, catálogo, solicitudes, entregas y devoluciones, control de restricciones, generación de multas e inventario XLSX. Permanecen pendientes el CRUD administrativo integral, regularización de multas, reportes adicionales. El código está publicado en https://github.com/frank-sokir/BiblioRed.
 
 ## Evidencia de esta actualización
 
 El 29 de octubre de 2026 se validó el SQL en una instancia MySQL 9.7.1 independiente, se inició el servidor con Maven y se verificaron acceso BCrypt, catálogo, circulación completa, disponibilidad, reporte Excel y permisos. Las 18 pruebas automáticas también aprobaron. Se conservan evidencias en docs/evidencias.
 
-El informe y las diapositivas del paquete describen la entrega original. Esta actualización cambia el inicio y la persistencia a MySQL. La guía actual y ACTUALIZACION_MYSQL.md documentan esta diferencia.
+El informe y las diapositivas actualizados describen el diseño y la persistencia en MySQL. La guía actual y docs/ACTUALIZACION_MYSQL.md explican la instalación y la validación.
 
 Reconstrucción asistida desde los avances 1 y 2. El equipo debe revisar y comprender el código antes de sustentar.
